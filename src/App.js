@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Route, Switch } from 'react-router';
+import { Redirect, Route, Switch } from 'react-router';
 import './App.css';
 import Header from './components/header/header.component';
 import { auth, createUserProfileDocument } from './firebase/firebase.utils';
@@ -43,15 +43,29 @@ class App extends React.Component {
         <Switch>
         <Route exact path='/' component={HomePage} />
         <Route path='/shop' component={ShopPage} />
-        <Route path='/signin' component={SignInAndSignUpPage} />
+        <Route exact path='/signin' render={() => this.props.currentUser ? (
+        <Redirect to='/' />
+        ) : (
+        <SignInAndSignUpPage/>
+        )
+      }
+      /> 
         </Switch>
       </div>
     );
   }
 }
 
+//don't show sign-in page to signed in user
+const mapStateToProps = ({user}) => ({
+  currentUser: user.currentUser
+}); 
+
 const mapDispatchToProps = dispatch => ({
   setCurrentUser: user => dispatch(setCurrentUser(user)) //invoking setcurrentuser with user that is used as the payload
 });
 
-export default connect(null, mapDispatchToProps)(App); //null, because we don't need currentuser from reducer
+export default connect(
+  mapStateToProps, 
+  mapDispatchToProps
+  )(App); //null, because we don't need currentuser from reducer
